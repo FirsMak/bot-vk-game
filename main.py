@@ -90,59 +90,63 @@ def delete_all_data():
     in_game = False
 
 def main():
-    print("spider-man")
-    global in_game
-    global number_true
-    global player
-    for event in longpool.listen():
-        if event.type == VkEventType.MESSAGE_NEW:
-            if event.to_me:
-                if event.from_chat:
-                    msg_text = event.text.lower()
-                    chat_id = event.chat_id
-                    user_id = event.user_id
-                    name = get_name(user_id)
-                    is_member = sesstion_api.groups.isMember(group_id=data.group_id, user_id=user_id)
-                    if not is_member:
-                        send_chat_msg(chat_id,
-                                      get_name(user_id) +' , мы не можем обработать ваш запрос, пока вы не подпишитесь на нашу группу)')
-                    else:
-                        if not user_id in mute_player_list:
-                                print(str(not user_id in mute_player_list)+"v mute")
-                                if not data.admin_disable_game:
-                                    print(not data.admin_disable_game)
-                                    if in_game:
-                                        if user_id == player.user_id:
-                                            if get_is_response(msg_text):
-                                                if int(msg_text) == number_true:
-                                                    player.win()
-                                                    send_chat_msg(chat_id, data.get_win_text(name))
-                                                    in_game = False
-                                                    number_true = get_random_number()
-                                                    return
-                                                else:
-                                                    player.change_attempts(number_true)
-                                                    if player.attempts == 0:
-                                                        player.lose(datetime.datetime.now())
-                                                        send_chat_msg(chat_id, data.get_lose_text(name, number_true))
-                                                        mute_player_list.append(player)
+    try:
+        global in_game
+        global number_true
+        global player
+        for event in longpool.listen():
+            if event.type == VkEventType.MESSAGE_NEW:
+                if event.to_me:
+                    if event.from_chat:
+                        msg_text = event.text.lower()
+                        chat_id = event.chat_id
+                        user_id = event.user_id
+                        name = get_name(user_id)
+                        is_member = sesstion_api.groups.isMember(group_id=data.group_id, user_id=user_id)
+                        if not is_member:
+                            send_chat_msg(chat_id,
+                                          get_name(user_id) +' , мы не можем обработать ваш запрос, пока вы не подпишитесь на нашу группу)')
+                        else:
+                            if not user_id in mute_player_list:
+                                    if not data.admin_disable_game:
+                                        print(not data.admin_disable_game)
+                                        if in_game:
+                                            if user_id == player.user_id:
+                                                if get_is_response(msg_text):
+                                                    if int(msg_text) == number_true:
+                                                        player.win()
+                                                        send_chat_msg(chat_id, data.get_win_text(name))
                                                         in_game = False
                                                         number_true = get_random_number()
+                                                        return
                                                     else:
-                                                        send_chat_msg(chat_id, data.get_continue_text(get_ch(player.attempts)))
+                                                        player.change_attempts(number_true)
+                                                        if player.attempts == 0:
+                                                            player.lose(datetime.datetime.now())
+                                                            send_chat_msg(chat_id, data.get_lose_text(name, number_true))
+                                                            mute_player_list.append(player)
+                                                            in_game = False
+                                                            number_true = get_random_number()
+                                                        else:
+                                                            send_chat_msg(chat_id, data.get_continue_text(get_ch(player.attempts)))
+                                            else:
+                                                send_chat_msg(chat_id, data.get_is_game_text())
                                         else:
-                                            send_chat_msg(chat_id, data.get_is_game_text())
+                                            print("Обрабатываем игрока")
+                                            if msg_text in data.patterns_start:
+                                                in_game = True
+                                                send_chat_msg(chat_id, data.get_start_text(name))
+                                                player = Player(user_id, data.all_attempts)
+                                                print(player)
                                     else:
-                                        if msg_text in data.patterns_start:
-                                            in_game = True
-                                            send_chat_msg(chat_id, data.get_start_text(name))
-                                            player = Player(user_id, data.all_attempts)
-                                            print(player)
-                                else:
-                                    delete_all_data()
-                    if user_id in data.admins_list:
-                        if "/" in msg_text:
-                            send_chat_msg(chat_id, data.admin_manager(msg_text))
+                                        delete_all_data()
+                        if user_id in data.admins_list:
+                            if "/" in msg_text:
+                                send_chat_msg(chat_id, data.admin_manager(msg_text))
+    except Exception:
+        print("Переподключение vk_side")
+        time.sleep(60)
+
 
 """Функция удаляет игроков которые в мьюте больше 10 минут"""
 def mute_listener(arg):
@@ -164,4 +168,5 @@ def mute_listener(arg):
 
 Thread(target=mute_listener, args=(1,)).start()
 
+print("spider-man")
 main()

@@ -89,6 +89,12 @@ def delete_all_data():
     number_true = get_random_number()
     in_game = False
 
+
+def add_player_mute_list(player):
+    if not player in data.admins_list:
+        mute_player_list.append(player)
+
+
 def main():
     try:
         print("Подключение установлено vk_side")
@@ -110,6 +116,7 @@ def main():
                         else:
                             if not user_id in mute_player_list:
                                     if not data.admin_disable_game:
+                                        print("Game: " + str(in_game))
                                         print(not data.admin_disable_game)
                                         if in_game:
                                             if user_id == player.user_id:
@@ -125,7 +132,7 @@ def main():
                                                         if player.attempts == 0:
                                                             player.lose(datetime.datetime.now())
                                                             send_chat_msg(chat_id, data.get_lose_text(name, number_true))
-                                                            mute_player_list.append(player)
+                                                            add_player_mute_list(player)
                                                             in_game = False
                                                             number_true = get_random_number()
                                                         else:
@@ -144,6 +151,7 @@ def main():
                         if user_id in data.admins_list:
                             if "/" in msg_text:
                                 send_chat_msg(chat_id, data.admin_manager(msg_text))
+                                number_true = get_random_number()
     except Exception:
         print("Переподключение vk_side")
         time.sleep(60)

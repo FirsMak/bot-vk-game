@@ -91,6 +91,7 @@ def delete_all_data():
 
 def main():
     try:
+        print("Подключение установлено vk_side")
         global in_game
         global number_true
         global player

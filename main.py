@@ -91,8 +91,11 @@ def delete_all_data():
 
 
 def add_player_mute_list(player):
-    if not player in data.admins_list:
+    if not int(player.user_id) in data.admins_list:
+        print("игрок не админ")
         mute_player_list.append(player)
+    else:
+        print("игрок админ")
 
 
 def main():
@@ -119,17 +122,20 @@ def main():
                                         print("Game: " + str(in_game))
                                         print(not data.admin_disable_game)
                                         if in_game:
+                                            print(number_true)
                                             if user_id == player.user_id:
                                                 if get_is_response(msg_text):
                                                     if int(msg_text) == number_true:
+                                                        print(number_true)
+                                                        """Если игрок выйграл"""
                                                         player.win()
                                                         send_chat_msg(chat_id, data.get_win_text(name))
                                                         in_game = False
                                                         number_true = get_random_number()
-                                                        return
                                                     else:
                                                         player.change_attempts(number_true)
                                                         if player.attempts == 0:
+                                                            """Если игрок проиграл"""
                                                             player.lose(datetime.datetime.now())
                                                             send_chat_msg(chat_id, data.get_lose_text(name, number_true))
                                                             add_player_mute_list(player)
@@ -138,7 +144,8 @@ def main():
                                                         else:
                                                             send_chat_msg(chat_id, data.get_continue_text(get_ch(player.attempts)))
                                             else:
-                                                send_chat_msg(chat_id, data.get_is_game_text())
+                                                if msg_text in data.patterns_start:
+                                                    send_chat_msg(chat_id, data.get_is_game_text())
                                         else:
                                             print("Обрабатываем игрока")
                                             if msg_text in data.patterns_start:
@@ -159,8 +166,8 @@ def main():
 
 """Функция удаляет игроков которые в мьюте больше 10 минут"""
 def mute_listener(arg):
-    global mute_player_list
     while True:
+        global mute_player_list
         if len (mute_player_list) != 0:
             print(mute_player_list)
             now = datetime.datetime.now()
@@ -171,6 +178,7 @@ def mute_listener(arg):
                     if delta.seconds > data.time_mute*60:
                         mute_player_list.remove(player)
             except RuntimeError:
+                print("Runtime error")
                 pass
         time.sleep(10)
 

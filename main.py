@@ -61,20 +61,20 @@ def pin_chat_msg(message_id, peer_id):
 def get_name(user_id):
     user = vk_session.method("users.get", {"user_ids": user_id})
     fullname = user[0]['first_name'] + ' ' + user[0]['last_name']
-    print(user)
     return fullname
 
 
 """Получаем случайное число"""
 def get_random_number():
     number_true = random.randint(data.init_number, data.last_number)
+    range_list = [i for i in range(data.init_number, data.last_number + 1)]
+    print(range_list)
     return number_true
 
 
 """Вернуть True если дали ответ"""
 def get_is_response(msg_text):
     range_list = [i for i in range(data.init_number, data.last_number+1)]
-    print(range_list)
     try:
         if int(msg_text) in range_list:
             return True
@@ -120,10 +120,10 @@ def delete_all_data():
 
 def add_player_mute_list(player):
     if not int(player.user_id) in data.admins_list:
-        print("игрок не админ")
+        print("от не админа")
         mute_player_list.append(player)
     else:
-        print("игрок админ")
+        print("от админа")
 
 
 def main():
@@ -151,13 +151,10 @@ def main():
                                         if not user_id in mute_player_list:
                                                 if not data.admin_disable_game:
                                                     print("Game: " + str(in_game))
-                                                    print(not data.admin_disable_game)
                                                     if in_game:
-                                                        print(number_true)
                                                         if user_id == player.user_id:
                                                             if get_is_response(msg_text):
                                                                 if int(msg_text) == number_true:
-                                                                    print(number_true)
                                                                     """Если игрок выйграл"""
                                                                     player.win()
                                                                     send_chat_msg(chat_id, data.get_win_text(name), reply_to=message_id)
@@ -176,14 +173,13 @@ def main():
                                                                         send_chat_msg(chat_id, data.get_continue_text(get_ch(player.attempts)), reply_to=message_id)
                                                         else:
                                                             if msg_text in data.patterns_start:
-                                                                send_chat_msg(chat_id, data.get_is_game_text())
+                                                                send_chat_msg(chat_id, data.get_is_game_text(), reply_to=message_id)
                                                     else:
                                                         print("Обрабатываем игрока")
                                                         if msg_text in data.patterns_start:
                                                             in_game = True
                                                             send_chat_msg(chat_id, data.get_start_text(name))
                                                             player = Player(user_id, data.all_attempts)
-                                                            print(player)
                                                 else:
                                                     delete_all_data()
                                     if user_id in data.admins_list:
@@ -203,7 +199,7 @@ def mute_listener(arg):
     while True:
         global mute_player_list
         if len (mute_player_list) != 0:
-            print(mute_player_list)
+            print("игроки в мьюте" + mute_player_list)
             now = datetime.datetime.now()
             try:
                 for player in mute_player_list:

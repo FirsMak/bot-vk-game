@@ -5,6 +5,8 @@ class Player:
     def __init__(self, user_id, attempts):
         self.user_id = user_id
         self.attempts = attempts
+        self.is_win = False
+
 
     def __int__(self):
         return int(self.user_id)

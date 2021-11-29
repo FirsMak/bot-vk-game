@@ -68,7 +68,7 @@ def get_name(user_id):
 def get_random_number():
     number_true = random.randint(data.init_number, data.last_number)
     range_list = [i for i in range(data.init_number, data.last_number + 1)]
-    print(range_list)
+    print("установлено рандомное число " + str(range_list))
     return number_true
 
 
@@ -135,10 +135,12 @@ def main():
                 global player
                 for event in longpool.listen():
                     if event.from_chat:
+                        chat_id = event.chat_id
+                        message_id = event.message_id
+                        if event.type_id == 6:
+                            send_chat_msg(chat_id, data.get_help_text(), reply_to=message_id)
                         if event.type == VkEventType.MESSAGE_NEW:
                             msg_text = event.text.lower()
-                            chat_id = event.chat_id
-                            message_id = event.message_id
                             peer_id = event.peer_id
                             if event.to_me:
                                     user_id = event.user_id
@@ -180,19 +182,25 @@ def main():
                                                             in_game = True
                                                             send_chat_msg(chat_id, data.get_start_text(name))
                                                             player = Player(user_id, data.all_attempts)
+                                                    if msg_text in data.pattern_help:
+                                                        send_chat_msg(chat_id, data.get_help_text(), reply_to=message_id)
                                                 else:
                                                     delete_all_data()
                                     if user_id in data.admins_list:
                                         if "/" in msg_text:
-                                            send_chat_msg(chat_id, data.admin_manager(msg_text))
-                                            number_true = get_random_number()
+                                            if data.patterns_start[0] in msg_text or data.pattern_help in msg_text:
+                                                pass
+                                            else:
+                                                send_chat_msg(chat_id, data.admin_manager(msg_text))
+                                                number_true = get_random_number()
                             else:
+                                """Закреление сообщения о победителе"""
                                 if data.text_win in msg_text:
                                     pin_chat_msg(message_id, peer_id)
                                     for admin_id in data.admins_list:
                                         send_some_msg(admin_id,"Победитель.", forward_messages=[message_id])
-            except Exception:
-                print("Переподключение vk_side")
+            except Exception as e:
+                print("Переподключение vk_side " + str(e))
                 time.sleep(60)
 
 """Функция удаляет игроков которые в мьюте"""

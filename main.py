@@ -189,7 +189,8 @@ def main():
                             else:
                                 if data.text_win in msg_text:
                                     pin_chat_msg(message_id, peer_id)
-                                    send_some_msg(data.admins_list[1],"Победитель.", forward_messages=[message_id])
+                                    for admin_id in data.admins_list:
+                                        send_some_msg(admin_id,"Победитель.", forward_messages=[message_id])
             except Exception:
                 print("Переподключение vk_side")
                 time.sleep(60)

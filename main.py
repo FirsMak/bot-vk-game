@@ -200,7 +200,7 @@ def mute_listener(arg):
     while True:
         global mute_player_list
         if len (mute_player_list) != 0:
-            print("игроки в мьюте" + mute_player_list)
+            print("игроки в мьюте" + str(mute_player_list))
             now = datetime.datetime.now()
             try:
                 for player in mute_player_list:

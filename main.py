@@ -139,9 +139,12 @@ def main():
                         chat_id = event.chat_id
                         message_id = event.message_id
                         if chat_id == data.chat_id:
-                            """Новый пользователь"""
-                            if event.type_id == 6:
-                                send_chat_msg(chat_id, data.get_help_text(), reply_to=message_id)
+                            """Новый пользователь, вывод текст"""
+                            try:
+                                if event.type_id == 6:
+                                    send_chat_msg(chat_id, data.get_help_text(), reply_to=message_id)
+                            except Exception as e2:
+                                print("error +" + str(e2))
                             if event.type == VkEventType.MESSAGE_NEW:
                                 msg_text = event.text.lower()
                                 peer_id = event.peer_id
@@ -216,7 +219,7 @@ def main():
                                             send_some_msg(admin_id,"Победитель.", forward_messages=[message_id])
             except Exception as e:
                 print("Переподключение vk_side " + str(e))
-                time.sleep(60)
+                time.sleep(2)
 
 """Функция удаляет игроков которые в мьюте"""
 def mute_listener(arg):

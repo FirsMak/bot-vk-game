@@ -31,7 +31,7 @@ def send_chat_msg(chat_id, some_text, forward_messages=None, reply_to = None):
 
 
 """Отправить сообщение пользователю вк"""
-def send_some_msg(user_id, some_text,  forward_messages=None, reply_to = None):
+def send_some_msg(user_id, some_text, forward_messages=None, reply_to = None):
     post = {
         "user_id": user_id,
         "message": some_text,
@@ -174,7 +174,9 @@ def main():
                                                                         player.win()
                                                                         send_chat_msg(chat_id, data.get_win_text(name),
                                                                                       reply_to=message_id)
+                                                                        add_player_mute_list(player)
                                                                         in_game = False
+                                                                        data.admin_disable_game = True
                                                                         number_true = get_random_number()
                                                                     else:
                                                                         player.change_attempts(number_true)
@@ -191,19 +193,22 @@ def main():
                                                                             send_chat_msg(chat_id, data.get_continue_text(
                                                                                 get_ch(player.attempts)), reply_to=message_id)
                                                             else:
+                                                                """Если игра уже запущена"""
                                                                 if msg_text in data.patterns_start:
                                                                     send_chat_msg(chat_id, data.get_is_game_text(),
                                                                                   reply_to=message_id)
                                                         else:
+                                                            """Запускаем игру"""
                                                             if msg_text in data.patterns_start:
                                                                 print("Обрабатываем игрока "+ str(user_id))
                                                                 in_game = True
                                                                 send_chat_msg(chat_id, data.get_start_text(name))
                                                                 player = Player(user_id, data.all_attempts)
-                                                        if msg_text in data.pattern_help:
+                                                        if data.pattern_help in msg_text:
                                                             send_chat_msg(chat_id, data.get_help_text(), reply_to=message_id)
                                                     else:
                                                         delete_all_data()
+                                            """Если пользователь админ, то проверяем команду"""
                                             if user_id in data.admins_list:
                                                 if "/" == msg_text[0]:
                                                     if data.patterns_start[0] in msg_text or data.pattern_help in msg_text:

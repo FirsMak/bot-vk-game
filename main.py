@@ -129,7 +129,7 @@ def add_player_mute_list(player):
 
 def main():
         while True:
-            try:
+            #try:
                 print("Подключение установлено vk_side")
                 global in_game
                 global number_true
@@ -137,6 +137,7 @@ def main():
                 for event in longpool.listen():
                     if event.from_chat:
                         chat_id = event.chat_id
+                        print(chat_id)
                         message_id = event.message_id
                         print("type_id" + str(event.type_id))
                         print("type" + str(event.type))
@@ -144,96 +145,97 @@ def main():
                             """Новый пользователь, вывод текст"""
                             if event.type_id == 6:
                                 send_chat_msg(chat_id, data.get_help_text(), reply_to=message_id)
-                            try:
-                                if event.type == VkEventType.MESSAGE_NEW:
-                                    msg_text = event.text.lower()
-                                    peer_id = event.peer_id
-                                    print (peer_id)
-                                    if event.to_me:
-                                            user_id = event.user_id
-                                            name = get_name(user_id)
-                                            is_member = sesstion_api.groups.isMember(group_id=data.group_id, user_id=user_id)
-                                            if not is_member:
-                                                send_chat_msg(chat_id,
-                                                              get_name(user_id) +' , мы не можем обработать ваш запрос, пока вы не подпишитесь на нашу группу)', reply_to=message_id)
-                                            else:
-                                                is_player_mute = False
-                                                for pl in mute_player_list:
-                                                    if pl.user_id == user_id:
-                                                        is_player_mute = True
-                                                print(is_player_mute)
-                                                if not is_player_mute:
-                                                    if not data.admin_disable_game:
-                                                        print("Game: " + str(in_game))
-                                                        if in_game:
-                                                            print ("player" + str(user_id) + "ndfd" + str(player.user_id))
-                                                            if user_id == player.user_id:
-                                                                if get_is_response(msg_text):
-                                                                    if int(msg_text) == number_true:
-                                                                        """Если игрок выйграл"""
-                                                                        player.win()
-                                                                        send_chat_msg(chat_id, data.get_win_text(name),
+                            #try:
+                            if event.type == VkEventType.MESSAGE_NEW:
+                                msg_text = event.text.lower()
+                                peer_id = event.peer_id
+                                print (peer_id)
+                                if event.to_me:
+                                        user_id = event.user_id
+                                        name = get_name(user_id)
+                                        print(data.group_id)
+                                        is_member = sesstion_api.groups.isMember(group_id=data.group_id, user_id=user_id)
+                                        if not is_member:
+                                            send_chat_msg(chat_id,
+                                                          get_name(user_id) +' , мы не можем обработать ваш запрос, пока вы не подпишитесь на нашу группу)', reply_to=message_id)
+                                        else:
+                                            is_player_mute = False
+                                            for pl in mute_player_list:
+                                                if pl.user_id == user_id:
+                                                    is_player_mute = True
+                                            print(is_player_mute)
+                                            if not is_player_mute:
+                                                if not data.admin_disable_game:
+                                                    print("Game: " + str(in_game))
+                                                    if in_game:
+                                                        print ("player" + str(user_id) + "ndfd" + str(player.user_id))
+                                                        if user_id == player.user_id:
+                                                            if get_is_response(msg_text):
+                                                                if int(msg_text) == number_true:
+                                                                    """Если игрок выйграл"""
+                                                                    player.win()
+                                                                    send_chat_msg(chat_id, data.get_win_text(name),
+                                                                                  reply_to=message_id)
+                                                                    add_player_mute_list(player)
+                                                                    in_game = False
+                                                                    data.admin_disable_game = True
+                                                                    number_true = get_random_number()
+                                                                else:
+                                                                    player.change_attempts(number_true)
+                                                                    if player.attempts == 0:
+                                                                        """Если игрок проиграл"""
+                                                                        player.lose(datetime.datetime.now())
+                                                                        send_chat_msg(chat_id,
+                                                                                      data.get_lose_text(name, number_true),
                                                                                       reply_to=message_id)
                                                                         add_player_mute_list(player)
                                                                         in_game = False
-                                                                        data.admin_disable_game = True
                                                                         number_true = get_random_number()
                                                                     else:
-                                                                        player.change_attempts(number_true)
-                                                                        if player.attempts == 0:
-                                                                            """Если игрок проиграл"""
-                                                                            player.lose(datetime.datetime.now())
-                                                                            send_chat_msg(chat_id,
-                                                                                          data.get_lose_text(name, number_true),
-                                                                                          reply_to=message_id)
-                                                                            add_player_mute_list(player)
-                                                                            in_game = False
-                                                                            number_true = get_random_number()
-                                                                        else:
-                                                                            send_chat_msg(chat_id, data.get_continue_text(
-                                                                                get_ch(player.attempts)), reply_to=message_id)
-                                                            else:
-                                                                """Если игра уже запущена"""
-                                                                if msg_text in data.patterns_start:
-                                                                    send_chat_msg(chat_id, data.get_is_game_text(),
-                                                                                  reply_to=message_id)
+                                                                        send_chat_msg(chat_id, data.get_continue_text(
+                                                                            get_ch(player.attempts)), reply_to=message_id)
                                                         else:
-                                                            """Запускаем игру"""
+                                                            """Если игра уже запущена"""
                                                             if msg_text in data.patterns_start:
-                                                                print("Обрабатываем игрока "+ str(user_id))
-                                                                in_game = True
-                                                                send_chat_msg(chat_id, data.get_start_text(name))
-                                                                player = Player(user_id, data.all_attempts)
-                                                        if data.pattern_help in msg_text:
-                                                            send_chat_msg(chat_id, data.get_help_text(), reply_to=message_id)
+                                                                send_chat_msg(chat_id, data.get_is_game_text(),
+                                                                              reply_to=message_id)
                                                     else:
-                                                        delete_all_data()
-                                            """Если пользователь админ, то проверяем команду"""
-                                            if user_id in data.admins_list:
-                                                if "/" == msg_text[0]:
-                                                    if data.patterns_start[0] in msg_text or data.pattern_help in msg_text:
-                                                        pass
-                                                    else:
-                                                        send_chat_msg(chat_id, data.admin_manager(msg_text))
-                                                        number_true = get_random_number()
-                                    else:
-                                        """Закреление сообщения о победителе"""
-                                        if data.text_win in msg_text:
-                                            pin_chat_msg(message_id, peer_id)
-                                            for admin_id in data.admins_list:
-                                                send_some_msg(admin_id,"Победитель.", forward_messages=[message_id])
-                                        """Отладка игры со стороны группы"""
-                                        if "/" == msg_text[0]:
-                                            if data.patterns_start[0] in msg_text or data.pattern_help in msg_text:
-                                                pass
-                                            else:
-                                                send_chat_msg(chat_id, data.admin_manager(msg_text))
-                                                number_true = get_random_number()
-                            except Exception:
-                                print("Update")
-            except Exception as e:
-                print("Переподключение vk_side " + str(e))
-                time.sleep(2)
+                                                        """Запускаем игру"""
+                                                        if msg_text in data.patterns_start:
+                                                            print("Обрабатываем игрока "+ str(user_id))
+                                                            in_game = True
+                                                            send_chat_msg(chat_id, data.get_start_text(name))
+                                                            player = Player(user_id, data.all_attempts)
+                                                    if data.pattern_help in msg_text:
+                                                        send_chat_msg(chat_id, data.get_help_text(), reply_to=message_id)
+                                                else:
+                                                    delete_all_data()
+                                        """Если пользователь админ, то проверяем команду"""
+                                        if user_id in data.admins_list:
+                                            if "/" == msg_text[0]:
+                                                if data.patterns_start[0] in msg_text or data.pattern_help in msg_text:
+                                                    pass
+                                                else:
+                                                    send_chat_msg(chat_id, data.admin_manager(msg_text))
+                                                    number_true = get_random_number()
+                                else:
+                                    """Закреление сообщения о победителе"""
+                                    if data.text_win in msg_text:
+                                        pin_chat_msg(message_id, peer_id)
+                                        for admin_id in data.admins_list:
+                                            send_some_msg(admin_id,"Победитель.", forward_messages=[message_id])
+                                    """Отладка игры со стороны группы"""
+                                    if "/" == msg_text[0]:
+                                        if data.patterns_start[0] in msg_text or data.pattern_help in msg_text:
+                                            pass
+                                        else:
+                                            send_chat_msg(chat_id, data.admin_manager(msg_text))
+                                            number_true = get_random_number()
+                            #except Exception:
+                                #print("Update")
+            #except Exception as e:
+                #print("Переподключение vk_side " + str(e))
+                #time.sleep(2)
 
 """Функция удаляет игроков которые в мьюте"""
 def mute_listener(arg):
